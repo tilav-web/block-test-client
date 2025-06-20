@@ -30,7 +30,6 @@ import {
 export default function QuizResults() {
   const [period, setPeriod] = useState<Period | 'all'>('all');
   const [results, setResults] = useState<QuizResult[]>([]);
-  console.log(results);
   
   const [pagination, setPagination] = useState({
     total: 0,
