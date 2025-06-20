@@ -110,13 +110,13 @@ export default function QuizResults() {
               </TableRow>
             ) : (
               results?.map((result) => (
-                <TableRow key={result._id}>
+                <TableRow key={result?._id}>
                   <TableCell>
-                    {format(new Date(result.createdAt), 'dd.MM.yyyy HH:mm')}
+                    {format(new Date(result?.createdAt), 'dd.MM.yyyy HH:mm')}
                   </TableCell>
-                  <TableCell>{result.block.name}</TableCell>
+                  <TableCell>{result?.block.name}</TableCell>
                   <TableCell className="font-medium">
-                    {result.totalScore}
+                    {result?.totalScore}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => setSelectedResult(result)}>
@@ -160,26 +160,26 @@ export default function QuizResults() {
             <DialogHeader>
               <DialogTitle>Test Natijasi</DialogTitle>
               <DialogDescription>
-                Foydalanuvchi: {selectedResult.user.full_name} | Block: {selectedResult.block.name}
+                Foydalanuvchi: {selectedResult?.user.full_name} | Block: {selectedResult?.block.name}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              {selectedResult.main && (
+              {selectedResult?.main && (
                 <div>
-                  <h4 className="font-semibold text-gray-800">Asosiy fan: {selectedResult.main.subject.name}</h4>
-                  <p className="text-sm text-gray-500">To'g'ri javoblar: {selectedResult.main.correctAnswers} | Ball: {selectedResult.main.score.toFixed(1)}</p>
+                  <h4 className="font-semibold text-gray-800">Asosiy fan: {selectedResult?.main.subject.name}</h4>
+                  <p className="text-sm text-gray-500">To'g'ri javoblar: {selectedResult?.main.correctAnswers} | Ball: {selectedResult?.main.score.toFixed(1)}</p>
                 </div>
               )}
-              {selectedResult.addition && (
+              {selectedResult?.addition && (
                  <div>
-                  <h4 className="font-semibold text-gray-800">Qo'shimcha fan: {selectedResult.addition.subject.name}</h4>
-                  <p className="text-sm text-gray-500">To'g'ri javoblar: {selectedResult.addition.correctAnswers} | Ball: {selectedResult.addition.score.toFixed(1)}</p>
+                  <h4 className="font-semibold text-gray-800">Qo'shimcha fan: {selectedResult?.addition.subject.name}</h4>
+                  <p className="text-sm text-gray-500">To'g'ri javoblar: {selectedResult?.addition.correctAnswers} | Ball: {selectedResult?.addition.score.toFixed(1)}</p>
                 </div>
               )}
-              {selectedResult.mandatory.length > 0 && (
+              {selectedResult?.mandatory.length > 0 && (
                  <div className="space-y-2">
                   <h4 className="font-semibold text-gray-800">Majburiy fanlar</h4>
-                  {selectedResult.mandatory.map((item, idx) => (
+                  {selectedResult?.mandatory.map((item, idx) => (
                     <div key={idx} className="p-2 border rounded-md bg-gray-50/50">
                       <p className="font-medium text-sm">{item.subject.name}</p>
                       <p className="text-xs text-gray-500">To'g'ri javoblar: {item.correctAnswers} | Ball: {item.score.toFixed(1)}</p>
@@ -189,9 +189,9 @@ export default function QuizResults() {
               )}
               <hr />
               <div>
-                <h4 className="font-semibold text-lg">Umumiy ball: {selectedResult.totalScore.toFixed(2)}</h4>
+                <h4 className="font-semibold text-lg">Umumiy ball: {selectedResult?.totalScore.toFixed(2)}</h4>
                 <p className="text-sm text-gray-500">
-                  Sana: {format(new Date(selectedResult.createdAt), 'dd.MM.yyyy HH:mm')}
+                  Sana: {format(new Date(selectedResult?.createdAt), 'dd.MM.yyyy HH:mm')}
                 </p>
               </div>
             </div>
