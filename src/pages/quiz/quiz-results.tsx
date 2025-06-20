@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import {
   Table,
@@ -104,14 +102,14 @@ export default function QuizResults() {
                   Yuklanmoqda...
                 </TableCell>
               </TableRow>
-            ) : results.length === 0 ? (
+            ) : results?.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center py-8">
                   Natijalar topilmadi
                 </TableCell>
               </TableRow>
             ) : (
-              results.map((result) => (
+              results?.map((result) => (
                 <TableRow key={result._id}>
                   <TableCell>
                     {format(new Date(result.createdAt), 'dd.MM.yyyy HH:mm')}
@@ -132,7 +130,7 @@ export default function QuizResults() {
         </Table>
       </div>
 
-      {pagination.pages > 1 && (
+      {pagination?.pages > 1 && (
         <div className="flex justify-center items-center gap-2 mt-4">
           <Button
             variant="outline"
