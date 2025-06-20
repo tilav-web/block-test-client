@@ -180,7 +180,6 @@ export default function Quiz() {
     });
 
     const payload = {
-      user: user._id || user.id || "",
       block: blockId,
       main,
       addition,

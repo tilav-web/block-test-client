@@ -64,7 +64,6 @@ export interface QuizResultMandatory {
 }
 
 export interface QuizResultPayload {
-  user: string;
   block: string;
   main: QuizResultSubject;
   addition: QuizResultSubject;
