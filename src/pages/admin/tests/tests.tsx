@@ -6,6 +6,22 @@ import { DeleteConfirmDialog } from './_components/DeleteConfirmDialog';
 import { TestViewDialog } from './_components/TestViewDialog';
 import { testsService, type Test, type CreateTestDto, type UpdateTestDto, type CreateTestWithFilesDto } from '@/services/tests.service';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { blockService, type Block } from '@/services/block.service';
+import { Button } from '@/components/ui/button';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { ChevronsUpDown, Check } from 'lucide-react';
 
 interface ApiError {
   response?: {
@@ -27,10 +43,14 @@ export const TestsPage: React.FC = () => {
   const [editingTest, setEditingTest] = useState<Test | null>(null);
   const [deletingTest, setDeletingTest] = useState<Test | null>(null);
   const [viewingTest, setViewingTest] = useState<Test | null>(null);
+  const [blocks, setBlocks] = useState<Block[]>([]);
+  const [blockSearch, setBlockSearch] = useState('');
+  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [blockPopoverOpen, setBlockPopoverOpen] = useState(false);
 
-  // Fetch tests on component mount
   useEffect(() => {
     fetchTests();
+    fetchBlocks();
   }, []);
 
   const fetchTests = async () => {
@@ -44,6 +64,15 @@ export const TestsPage: React.FC = () => {
       toastError(apiError.response?.data?.message || 'Testlarni yuklashda xatolik yuz berdi');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchBlocks = async () => {
+    try {
+      const data = await blockService.getAll();
+      setBlocks(data);
+    } catch {
+      toastError('Bloklarni yuklashda xatolik yuz berdi');
     }
   };
 
@@ -149,6 +178,17 @@ export const TestsPage: React.FC = () => {
     setDeletingTest(null);
   };
 
+  // Filter blocks by search
+  const filteredBlocks = blocks.filter((block) =>
+    block.name.toLowerCase().includes(blockSearch.toLowerCase())
+  );
+  const selectedBlock = blocks.find((b) => b._id === selectedBlockId);
+
+  // Optionally filter tests by selected block
+  const filteredTests = selectedBlockId
+    ? tests.filter((t) => t.subject && t.subject._id && t.subject._id === selectedBlockId)
+    : tests;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-7xl mx-auto">
@@ -158,9 +198,57 @@ export const TestsPage: React.FC = () => {
             Testlarni qo'shish, tahrirlash va o'chirish
           </p>
         </div>
-
+        {/* Block selection combobox */}
+        <div className="mb-6 max-w-xs">
+          <Popover open={blockPopoverOpen} onOpenChange={setBlockPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={blockPopoverOpen}
+                className="w-full justify-between"
+              >
+                {selectedBlock ? selectedBlock.name : 'Blokni tanlang...'}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0">
+              <Command>
+                <CommandInput
+                  placeholder="Blok nomi bo'yicha qidiring..."
+                  value={blockSearch}
+                  onValueChange={setBlockSearch}
+                  className="h-9"
+                />
+                <CommandList>
+                  <CommandEmpty>Blok topilmadi.</CommandEmpty>
+                  <CommandGroup>
+                    {filteredBlocks.map((block) => (
+                      <CommandItem
+                        key={block._id}
+                        value={block.name}
+                        onSelect={() => {
+                          setSelectedBlockId(block._id);
+                          setBlockPopoverOpen(false);
+                        }}
+                      >
+                        {block.name}
+                        <Check
+                          className={
+                            'ml-auto ' +
+                            (selectedBlockId === block._id ? 'opacity-100' : 'opacity-0')
+                          }
+                        />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
         <TestTable
-          tests={tests}
+          tests={filteredTests}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onAdd={handleAdd}
@@ -171,7 +259,7 @@ export const TestsPage: React.FC = () => {
         {/* Form Modal */}
         {showForm && (
           <Dialog open={showForm} onOpenChange={handleFormCancel}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="w-full sm:max-w-[70vw] max-w-[90vw] max-h-[90vh] overflow-y-auto">
               <TestForm
                 test={editingTest}
                 onSubmit={handleFormSubmit}

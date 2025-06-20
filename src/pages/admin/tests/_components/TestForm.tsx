@@ -6,6 +6,21 @@ import { Save, Plus, Trash2, Upload, Link, Type } from 'lucide-react';
 import type { Test, CreateTestDto, UpdateTestDto, TestType, TestDegree, OptionType, CreateOptionDto, CreateTestWithFilesDto } from '@/services/tests.service';
 import type { Subject } from '@/services/subject.service';
 import { subjectService } from '@/services/subject.service';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { ChevronsUpDown, Check } from 'lucide-react';
+import { useDebounce } from '@/hooks/use-debounce';
 
 interface TestFormProps {
   test?: Test | null;
@@ -27,6 +42,7 @@ export const TestForm: React.FC<TestFormProps> = ({
   isLoading,
 }) => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [initialSubjects, setInitialSubjects] = useState<Subject[]>([]);
   const [selectedSubject, setSelectedSubject] = useState('');
   const [question, setQuestion] = useState('');
   const [target, setTarget] = useState('');
@@ -40,10 +56,43 @@ export const TestForm: React.FC<TestFormProps> = ({
     { type: 'text', value: '' }
   ]);
   const [correctOptionIndex, setCorrectOptionIndex] = useState(0);
+  const [subjectSearch, setSubjectSearch] = useState('');
+  const [subjectPopoverOpen, setSubjectPopoverOpen] = useState(false);
+  const debouncedSubjectSearch = useDebounce(subjectSearch, 400);
+
+  // Test type options
+  const testTypeOptions: { value: TestType; label: string; icon: React.ReactNode }[] = [
+    { value: 'text', label: 'Matn', icon: <Type className="h-4 w-4" /> },
+    { value: 'file', label: 'Rasm', icon: <Upload className="h-4 w-4" /> },
+    { value: 'url', label: 'URL', icon: <Link className="h-4 w-4" /> },
+  ];
+  // Option type options
+  const optionTypeOptions: { value: OptionType; label: string }[] = [
+    { value: 'text', label: 'Matn' },
+    { value: 'file', label: 'Rasm' },
+    { value: 'url', label: 'URL' },
+  ];
+
+  const degreeOptions = [
+    { value: 'easy', label: 'Oson' },
+    { value: 'hard', label: 'Qiyin' },
+  ];
 
   useEffect(() => {
-    fetchSubjects();
+    // Fetch only 10 subjects initially
+    subjectService.getLimited(10).then((data) => {
+      setSubjects(data);
+      setInitialSubjects(data);
+    });
   }, []);
+
+  useEffect(() => {
+    if (debouncedSubjectSearch.trim() === '') {
+      setSubjects(initialSubjects);
+    } else {
+      subjectService.searchByName(debouncedSubjectSearch).then(setSubjects);
+    }
+  }, [debouncedSubjectSearch, initialSubjects]);
 
   useEffect(() => {
     if (test) {
@@ -70,15 +119,6 @@ export const TestForm: React.FC<TestFormProps> = ({
       setCorrectOptionIndex(0);
     }
   }, [test]);
-
-  const fetchSubjects = async () => {
-    try {
-      const data = await subjectService.getAll();
-      setSubjects(data);
-    } catch (error) {
-      console.error('Error fetching subjects:', error);
-    }
-  };
 
   const handleAddOption = () => {
     setOptions([...options, { type: 'text', value: '' }]);
@@ -191,11 +231,11 @@ export const TestForm: React.FC<TestFormProps> = ({
     }
   };
 
-  const isValid = selectedSubject && 
-    ((questionType === 'file' && questionFile && question.trim()) || 
-     (questionType === 'url' && target.trim() && question.trim()) ||
-     (questionType === 'text' && question.trim())) && 
-    options.filter(opt => opt.value.trim()).length >= 2;
+  const isValid = selectedSubject &&
+    ((questionType === 'file' && questionFile) ||
+      (questionType === 'url' && target.trim() && question.trim()) ||
+      (questionType === 'text' && question.trim())) &&
+    options.filter(opt => opt.value.trim() || opt.file).length >= 2;
 
   const getTypeIcon = (type: TestType) => {
     switch (type) {
@@ -267,6 +307,9 @@ export const TestForm: React.FC<TestFormProps> = ({
     }
   };
 
+  const filteredSubjects = subjects;
+  const selectedSubjectObj = subjects.find((s) => s._id === selectedSubject);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -276,43 +319,73 @@ export const TestForm: React.FC<TestFormProps> = ({
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Subject Selection */}
-        <div className="space-y-2">
-          <Label htmlFor="subject">Fan</Label>
-          <select
-            id="subject"
-            value={selectedSubject}
-            onChange={(e) => setSelectedSubject(e.target.value)}
-            disabled={isLoading}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">Fanni tanlang</option>
-            {subjects.map((subject) => (
-              <option key={subject._id} value={subject._id}>
-                {subject.name}
-              </option>
-            ))}
-          </select>
+        {/* Subject (Fan) selection combobox */}
+        <div className="mb-4">
+          <Label>Fan</Label>
+          <Popover open={subjectPopoverOpen} onOpenChange={setSubjectPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={subjectPopoverOpen}
+                className="w-full justify-between"
+                type="button"
+              >
+                {selectedSubjectObj ? selectedSubjectObj.name : 'Fan tanlang...'}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0">
+              <Command>
+                <CommandInput
+                  placeholder="Fan nomi bo'yicha qidiring..."
+                  value={subjectSearch}
+                  onValueChange={setSubjectSearch}
+                  className="h-9"
+                />
+                <CommandList>
+                  <CommandEmpty>Fan topilmadi.</CommandEmpty>
+                  <CommandGroup>
+                    {filteredSubjects.map((subject) => (
+                      <CommandItem
+                        key={subject._id}
+                        value={subject.name}
+                        onSelect={() => {
+                          setSelectedSubject(subject._id);
+                          setSubjectPopoverOpen(false);
+                        }}
+                      >
+                        {subject.name}
+                        <Check
+                          className={
+                            'ml-auto ' +
+                            (selectedSubject === subject._id ? 'opacity-100' : 'opacity-0')
+                          }
+                        />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Question Type */}
         <div className="space-y-2">
-          <Label htmlFor="questionType">Savol turi</Label>
           <div className="flex items-center gap-2">
-            {getTypeIcon(questionType)}
-            <select
-              id="questionType"
-              value={questionType}
-              onChange={(e) => {
-                handleQuestionTypeChange(e.target.value as TestType);
-              }}
-              disabled={isLoading}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="text">Matn</option>
-              <option value="file">Fayl</option>
-              <option value="url">URL</option>
-            </select>
+            {/* Button group for test type */}
+            {testTypeOptions.map((opt) => (
+              <Button
+                key={opt.value}
+                type="button"
+                variant={questionType === opt.value ? 'default' : 'outline'}
+                onClick={() => handleQuestionTypeChange(opt.value as TestType)}
+                className={questionType === opt.value ? 'bg-blue-600 text-white' : ''}
+              >
+                {opt.icon} <span className="ml-1">{opt.label}</span>
+              </Button>
+            ))}
           </div>
         </div>
 
@@ -346,7 +419,6 @@ export const TestForm: React.FC<TestFormProps> = ({
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder="Savol matnini kiriting (masalan: Bu rasmda nima ko'rsatilgan?)"
-                required
                 disabled={isLoading}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
@@ -390,35 +462,25 @@ export const TestForm: React.FC<TestFormProps> = ({
         {/* Degree */}
         <div className="space-y-2">
           <Label htmlFor="degree">Daraja</Label>
-          <select
-            id="degree"
-            value={degree}
-            onChange={(e) => setDegree(e.target.value as TestDegree)}
-            disabled={isLoading}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="easy">Oson</option>
-            <option value="hard">Qiyin</option>
-          </select>
+          <div className="flex gap-2">
+            {degreeOptions.map((opt) => (
+              <Button
+                key={opt.value}
+                type="button"
+                variant={degree === opt.value ? 'default' : 'outline'}
+                onClick={() => setDegree(opt.value as TestDegree)}
+                className={degree === opt.value ? 'bg-blue-600 text-white' : ''}
+                disabled={isLoading}
+              >
+                {opt.label}
+              </Button>
+            ))}
+          </div>
         </div>
 
         {/* Options */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label>Variantlar</Label>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleAddOption}
-              disabled={isLoading}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Variant qo'shish
-            </Button>
-          </div>
-          
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {options.map((option, index) => (
               <div key={index} className="border border-gray-200 rounded-lg p-4 space-y-3">
                 <div className="flex items-center gap-3">
@@ -447,58 +509,66 @@ export const TestForm: React.FC<TestFormProps> = ({
                     </Button>
                   )}
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {/* Option Type */}
-                  <div className="space-y-2">
-                    <Label className="text-sm">Variant turi</Label>
-                    <select
-                      value={option.type}
-                      onChange={(e) => handleOptionChange(index, 'type', e.target.value)}
-                      disabled={isLoading}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                    >
-                      <option value="text">Matn</option>
-                      <option value="file">Fayl</option>
-                      <option value="url">URL</option>
-                    </select>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    {optionTypeOptions.map((opt) => (
+                      <Button
+                        key={opt.value}
+                        type="button"
+                        variant={option.type === opt.value ? 'default' : 'outline'}
+                        onClick={() => handleOptionChange(index, 'type', opt.value)}
+                        className={option.type === opt.value ? 'bg-blue-600 text-white' : ''}
+                      >
+                        {opt.label}
+                      </Button>
+                    ))}
                   </div>
-                  
-                  {/* Option Value */}
-                  <div className="space-y-2">
-                    <Label className="text-sm">Variant qiymati</Label>
-                    {option.type === 'file' ? (
-                      <div className="space-y-2">
-                        <Input
-                          type="file"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            handleOptionFileChange(index, file || null);
-                          }}
-                          disabled={isLoading}
-                          className="text-sm"
-                          accept="image/*"
-                        />
-                        {option.file && (
-                          <div className="text-xs text-gray-500">
-                            Tanlangan fayl: {option.file.name}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
+                </div>
+                <div className="space-y-2">
+                  {option.type === 'file' ? (
+                    <div className="space-y-2">
                       <Input
-                        type={getInputType(option.type)}
-                        value={option.value}
-                        onChange={(e) => handleOptionChange(index, 'value', e.target.value)}
-                        placeholder={getPlaceholder(option.type)}
+                        type="file"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          handleOptionFileChange(index, file || null);
+                        }}
                         disabled={isLoading}
                         className="text-sm"
+                        accept="image/*"
                       />
-                    )}
-                  </div>
+                      {option.file && (
+                        <div className="text-xs text-gray-500">
+                          Tanlangan fayl: {option.file.name}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <Input
+                      type={getInputType(option.type)}
+                      value={option.value}
+                      onChange={(e) => handleOptionChange(index, 'value', e.target.value)}
+                      placeholder={getPlaceholder(option.type)}
+                      disabled={isLoading}
+                      className="text-sm"
+                    />
+                  )}
                 </div>
               </div>
             ))}
+          </div>
+          <div className="flex justify-end pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className='w-full'
+              onClick={handleAddOption}
+              disabled={isLoading}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Variant qo'shish
+            </Button>
           </div>
         </div>
 

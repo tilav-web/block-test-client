@@ -65,6 +65,16 @@ class SubjectService {
       throw error;
     }
   }
+
+  async getLimited(limit: number = 10): Promise<Subject[]> {
+    const response = await privateInstance.get(`/subjects/limited?limit=${limit}`);
+    return response.data;
+  }
+
+  async searchByName(query: string): Promise<Subject[]> {
+    const response = await privateInstance.get(`/subjects/search?q=${encodeURIComponent(query)}`);
+    return response.data;
+  }
 }
 
 export const subjectService = new SubjectService(); 

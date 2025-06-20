@@ -6,6 +6,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../components/ui/dialog";
 import { subjectService } from "../../services/subject.service";
 import type { Subject } from "../../services/subject.service";
+import { serverUrl } from "../../common/api/axios-instance";
 
 // Helper to get remaining time from localStorage or default (3 hours)
 const getInitialTime = () => {
@@ -391,6 +392,13 @@ export default function Quiz() {
                 <h2 className="text-xl font-bold text-gray-900 mb-6 leading-relaxed">
                   {current + 1}. {currentQuestion?.question}
                 </h2>
+                {(currentQuestion?.type === "file" || currentQuestion?.type === "url") && currentQuestion?.target && (
+                  <img
+                    src={currentQuestion.type === "url" ? currentQuestion.target : serverUrl + currentQuestion.target}
+                    alt="Savol rasmi"
+                    className="mb-4 max-h-64 object-contain"
+                  />
+                )}
                 {/* Options */}
                 <div className="space-y-4">
                   {(currentQuestion?.options || []).map((opt, idx) => (
@@ -408,9 +416,15 @@ export default function Quiz() {
                           {String.fromCharCode(65 + idx)}
                         </span>
                         <div className="flex-1">
-                          <span className="text-gray-900 block mb-2">
-                            {opt.value}
-                          </span>
+                          {(opt.type === "file" || opt.type === "url") ? (
+                            <img
+                              src={opt.type === "url" ? opt.value : serverUrl + opt.value}
+                              alt="Variant rasmi"
+                              className="mb-2 max-h-32 object-contain"
+                            />
+                          ) : (
+                            <span className="text-gray-900 block mb-2">{opt.value}</span>
+                          )}
                         </div>
                       </div>
                     </button>

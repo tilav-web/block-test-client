@@ -27,6 +27,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Fragment } from 'react/jsx-runtime';
+import { useAuth } from '@/hooks/useAuth';
 
 // Breadcrumb component
 const Breadcrumb = () => {
@@ -82,6 +83,7 @@ const navigation = [
 export const AppSidebar = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth()
 
   const handleLogout = () => {
     // TODO: Implement logout logic
@@ -164,11 +166,11 @@ export const AppSidebar = ({ children }: { children: React.ReactNode }) => {
             {/* User menu */}
             <div className="flex items-center space-x-3">
               <div className="hidden sm:block text-right">
-                <div className="text-sm font-medium text-gray-900">Admin User</div>
-                <div className="text-xs text-gray-500">admin@testblok.uz</div>
+                <div className="text-sm font-medium text-gray-900">{user?.full_name}</div>
+                <div className="text-xs text-gray-500">{user?.email}</div>
               </div>
               <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center shadow-sm">
-                <span className="text-sm font-medium text-white">A</span>
+                <span className="text-sm font-medium text-white">{user?.full_name.charAt(0)}</span>
               </div>
             </div>
           </div>
