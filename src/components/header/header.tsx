@@ -33,9 +33,9 @@ const Header: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">
-                  TestBlok.uz
+                  BlokTest.uz
                 </h1>
-                <p className="text-xs text-gray-500 -mt-1">Abituriyentlar uchun</p>
+                <p className="text-xs text-gray-500 -mt-1">Abiturentlikdan talabalik sari yo'l</p>
               </div>
             </Link>
 
