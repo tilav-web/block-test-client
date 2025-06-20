@@ -114,7 +114,7 @@ export default function QuizResults() {
                   <TableCell>
                     {format(new Date(result?.createdAt), 'dd.MM.yyyy HH:mm')}
                   </TableCell>
-                  <TableCell>{result?.block.name}</TableCell>
+                  <TableCell>{result?.block?.name}</TableCell>
                   <TableCell className="font-medium">
                     {result?.totalScore}
                   </TableCell>
@@ -160,7 +160,7 @@ export default function QuizResults() {
             <DialogHeader>
               <DialogTitle>Test Natijasi</DialogTitle>
               <DialogDescription>
-                Foydalanuvchi: {selectedResult?.user.full_name} | Block: {selectedResult?.block.name}
+                Foydalanuvchi: {selectedResult?.user.full_name} | Block: {selectedResult?.block?.name}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
