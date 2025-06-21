@@ -62,7 +62,7 @@ const renderContent = (type: string, value: string) => {
       return (
         <div className="mt-2">
           <img 
-            src={`${serverUrl}${value}`} 
+            src={`${serverUrl}/quiz${value}`} 
             alt="Content" 
             className="max-w-full h-auto max-h-64 rounded-lg border"
             onError={(e) => {

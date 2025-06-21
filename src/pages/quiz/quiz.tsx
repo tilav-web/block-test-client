@@ -393,7 +393,7 @@ export default function Quiz() {
                 </h2>
                 {(currentQuestion?.type === "file" || currentQuestion?.type === "url") && currentQuestion?.target && (
                   <img
-                    src={currentQuestion.type === "url" ? currentQuestion.target : serverUrl + '/dist' + currentQuestion.target}
+                    src={currentQuestion.type === "url" ? currentQuestion.target : serverUrl + '/quiz' + currentQuestion.target}
                     alt="Savol rasmi"
                     className="mb-4 max-h-64 object-contain"
                   />
@@ -417,7 +417,7 @@ export default function Quiz() {
                         <div className="flex-1">
                           {(opt.type === "file" || opt.type === "url") ? (
                             <img
-                              src={opt.type === "url" ? opt.value : serverUrl + opt.value}
+                              src={opt.type === "url" ? opt.value : serverUrl + '/quiz' + opt.value}
                               alt="Variant rasmi"
                               className="mb-2 max-h-32 object-contain"
                             />
