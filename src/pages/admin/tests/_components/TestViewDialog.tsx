@@ -2,7 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Type, Upload, Link, CheckCircle } from 'lucide-react';
 import type { Test } from '@/services/tests.service';
-import { serverUrl } from '@/common/utils/shared';
+import { serverUrl } from '@/common/api/axios-instance';
 
 interface TestViewDialogProps {
   test: Test;
@@ -62,7 +62,7 @@ const renderContent = (type: string, value: string) => {
       return (
         <div className="mt-2">
           <img 
-            src={`${serverUrl}/dist${value}`} 
+            src={`${serverUrl}${value}`} 
             alt="Content" 
             className="max-w-full h-auto max-h-64 rounded-lg border"
             onError={(e) => {

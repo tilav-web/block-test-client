@@ -417,7 +417,7 @@ export default function Quiz() {
                         <div className="flex-1">
                           {(opt.type === "file" || opt.type === "url") ? (
                             <img
-                              src={opt.type === "url" ? opt.value : serverUrl + '/dist' + opt.value}
+                              src={opt.type === "url" ? opt.value : serverUrl + opt.value}
                               alt="Variant rasmi"
                               className="mb-2 max-h-32 object-contain"
                             />
