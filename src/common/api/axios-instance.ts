@@ -4,7 +4,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 
-export const serverUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+export const serverUrl = import.meta.env.VITE_API_URL || 'https://api.blok-tets.uz';
 
 const responseInstance = (instance: AxiosInstance) => {
   instance.interceptors.response.use(
