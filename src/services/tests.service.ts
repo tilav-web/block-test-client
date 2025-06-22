@@ -69,7 +69,7 @@ export interface CreateTestWithFilesDto {
   correctOptionValue: string;
   questionFile?: File;
   optionFiles?: File[];
-  degree?: TestDegree;
+  degree: TestDegree;
 }
 
 export interface UpdateTestDto {
@@ -120,6 +120,7 @@ class TestsService {
       // Add basic fields
       formData.append('subject', data.subject);
       formData.append('type', data.type);
+      formData.append('degree', data.degree);
       formData.append('question', data.question);
       formData.append('correctOptionValue', data.correctOptionValue);
       
@@ -144,11 +145,12 @@ class TestsService {
       console.log('Sending form data:', {
         subject: data.subject,
         type: data.type,
+        degree: data.degree,
         question: data.question,
         correctOptionValue: data.correctOptionValue,
         questionFile: data.questionFile?.name,
         optionFiles: data.optionFiles?.map(f => f.name),
-        options: data.options
+        options: data.options,
       });
       
       const response = await privateInstanceFile.post(API_ENDPOINTS.TESTS.CREATE, formData);

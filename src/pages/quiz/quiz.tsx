@@ -43,6 +43,7 @@ export default function Quiz() {
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
   const [subjects, setSubjects] = useState<Subject[]>([]);
 
+
   // Fetch quiz data
   useEffect(() => {
     if (!blockId) return;

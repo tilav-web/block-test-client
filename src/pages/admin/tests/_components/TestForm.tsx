@@ -165,7 +165,8 @@ export const TestForm: React.FC<TestFormProps> = ({
       questionFile,
       questionType,
       options,
-      correctOptionIndex
+      correctOptionIndex,
+      degree
     });
     
     if (!selectedSubject || options.some(opt => !opt.value.trim())) {
