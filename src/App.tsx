@@ -18,6 +18,7 @@ import AdminDashboard from './pages/admin/dashboard/admin-dashboard';
 import Quiz from './pages/quiz/quiz';
 import QuizResults from './pages/quiz/quiz-results';
 import QuizRating from './pages/quiz/quiz-rating';
+import Profile from './pages/profile/profile';
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,14 @@ const router = createBrowserRouter([
         element: (
           <PrivateRoute roles={['student', 'admin']}>
             <PublicBlocksPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "profile",
+        element: (
+          <PrivateRoute roles={['student', 'admin']}>
+            <Profile />
           </PrivateRoute>
         ),
       },

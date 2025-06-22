@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
     PROFILE: '/auth/profile',
     DASHBOARD: '/auth/dashboard',
     ADMIN_PANEL: '/auth/admin-panel',
+    CHANGE_PASSWORD: '/auth/change-password',
   },
   
   // Subject endpoints

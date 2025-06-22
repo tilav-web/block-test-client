@@ -113,6 +113,20 @@ class AuthService {
       throw error;
     }
   }
+
+  async changePassword({ oldPassword, newPassword, confirmPassword }: { oldPassword: string; newPassword: string; confirmPassword: string; }) {
+    try {
+      const response = await privateInstance.patch(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, {
+        oldPassword,
+        newPassword,
+        confirmPassword,
+      });
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
 }
 
 export const authService = new AuthService();
