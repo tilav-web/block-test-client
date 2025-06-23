@@ -43,10 +43,7 @@ export default function QuizResults() {
   const fetchResults = async () => {
     setLoading(true);
     try {
-      const data = period === 'all'
-        ? await quizResultsService.getAllTimeResults(pagination.page, pagination.limit)
-        : await quizResultsService.getResultsByPeriod(period, pagination.page, pagination.limit);
-      
+      const data = await quizResultsService.getMyRatings(period, pagination.page, pagination.limit);
       setResults(data.results);
       setPagination(data.pagination);
     } catch (error) {

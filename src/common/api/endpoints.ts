@@ -54,6 +54,7 @@ export const API_ENDPOINTS = {
     GET_RESULTS: '/quiz/results',
     GET_RESULTS_BY_PERIOD: (period: string) => `/quiz/results/${period}`,
     GET_RATINGS_BY_PERIOD: (period: string) => `/quiz/ratings/${period}`,
+    GET_MY_RATINGS_BY_PERIOD: (period: string) => `/quiz/ratings/${period}`,
   },
 } as const;
 

@@ -94,6 +94,25 @@ class QuizResultsService {
       throw error;
     }
   }
+
+  async getMyRatings(
+    period: Period | 'all',
+    page = 1,
+    limit = 10,
+  ): Promise<QuizResultsResponse> {
+    try {
+      const response = await privateInstance.get(
+        API_ENDPOINTS.QUIZ.GET_MY_RATINGS_BY_PERIOD(period),
+        {
+          params: { page, limit },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching my quiz ratings:', error);
+      throw error;
+    }
+  }
 }
 
 export const quizResultsService = new QuizResultsService();
