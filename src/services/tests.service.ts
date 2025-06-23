@@ -82,10 +82,22 @@ export interface UpdateTestDto {
   degree?: TestDegree;
 }
 
+export interface TestPaginationResponse {
+  results: Test[];
+  pagination: {
+    total: number;
+    pages: number;
+    page: number;
+    limit: number;
+  };
+}
+
 class TestsService {
-  async getAll(): Promise<Test[]> {
+  async getAll(page = 1, limit = 10): Promise<TestPaginationResponse> {
     try {
-      const response = await privateInstance.get(API_ENDPOINTS.TESTS.GET_ALL);
+      const response = await privateInstance.get(API_ENDPOINTS.TESTS.GET_ALL, {
+        params: { page, limit },
+      });
       return response.data;
     } catch (error) {
       console.error('Error fetching tests:', error);

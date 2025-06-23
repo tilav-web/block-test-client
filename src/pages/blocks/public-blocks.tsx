@@ -257,7 +257,7 @@ export const PublicBlocksPage: React.FC = () => {
                   ) : (
                     <div className="flex items-center justify-center">
                       <Link
-                        to={"https://t.me/Kompyuter_xizmatlari_TAF"}
+                        to={"https://t.me/Tolov_admini_btu"}
                         className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1 rounded py-2 px-3"
                       >
                         <ShoppingCart className="h-4 w-4 mr-2" />

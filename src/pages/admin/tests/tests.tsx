@@ -4,7 +4,7 @@ import { TestTable } from './_components/TestTable';
 import { TestForm } from './_components/TestForm';
 import { DeleteConfirmDialog } from './_components/DeleteConfirmDialog';
 import { TestViewDialog } from './_components/TestViewDialog';
-import { testsService, type Test, type CreateTestDto, type UpdateTestDto, type CreateTestWithFilesDto } from '@/services/tests.service';
+import { testsService, type Test, type CreateTestDto, type UpdateTestDto, type CreateTestWithFilesDto, type TestPaginationResponse } from '@/services/tests.service';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { blockService, type Block } from '@/services/block.service';
 import { Button } from '@/components/ui/button';
@@ -47,17 +47,28 @@ export const TestsPage: React.FC = () => {
   const [blockSearch, setBlockSearch] = useState('');
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [blockPopoverOpen, setBlockPopoverOpen] = useState(false);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    pages: 0,
+    page: 1,
+    limit: 10,
+  });
 
   useEffect(() => {
     fetchTests();
     fetchBlocks();
   }, []);
 
+  useEffect(() => {
+    fetchTests();
+  }, [pagination.page]);
+
   const fetchTests = async () => {
     try {
       setIsLoading(true);
-      const data = await testsService.getAll();
-      setTests(data);
+      const data: TestPaginationResponse = await testsService.getAll(pagination.page, pagination.limit);
+      setTests(data.results);
+      setPagination(prev => ({ ...prev, ...data.pagination }));
     } catch (error: unknown) {
       console.error('Error fetching tests:', error);
       const apiError = error as ApiError;
@@ -189,6 +200,10 @@ export const TestsPage: React.FC = () => {
     ? tests.filter((t) => t.subject && t.subject._id && t.subject._id === selectedBlockId)
     : tests;
 
+  const handlePageChange = (newPage: number) => {
+    setPagination(prev => ({ ...prev, page: newPage }));
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-7xl mx-auto">
@@ -255,6 +270,31 @@ export const TestsPage: React.FC = () => {
           onView={handleView}
           isLoading={isLoading}
         />
+
+        {/* Pagination */}
+        {pagination.pages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-4">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handlePageChange(pagination.page - 1)}
+              disabled={pagination.page === 1}
+            >
+              {'<'}
+            </Button>
+            <span className="mx-2">
+              {pagination.page} / {pagination.pages}
+            </span>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handlePageChange(pagination.page + 1)}
+              disabled={pagination.page === pagination.pages}
+            >
+              {'>'}
+            </Button>
+          </div>
+        )}
 
         {/* Form Modal */}
         {showForm && (
