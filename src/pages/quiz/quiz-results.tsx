@@ -114,7 +114,7 @@ export default function QuizResults() {
                   </TableCell>
                   <TableCell>{result?.block?.name}</TableCell>
                   <TableCell className="font-medium">
-                    {result?.totalScore}
+                    {result?.totalScore?.toFixed(2)}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => setSelectedResult(result)}>

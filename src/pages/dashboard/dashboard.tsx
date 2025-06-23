@@ -48,7 +48,7 @@ export const DashboardPage: React.FC = () => {
               <BookOpen className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">10+</div>
+              <div className="text-2xl font-bold">50+</div>
               <p className="text-xs text-muted-foreground">
                 Turli fanlar bo'yicha
               </p>
