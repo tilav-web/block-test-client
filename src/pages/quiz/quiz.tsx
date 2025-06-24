@@ -484,7 +484,7 @@ export default function Quiz() {
             <div className="p-8 bg-white">
               <div className="mb-6 flex flex-col items-center">
                 <span className="text-lg font-semibold text-gray-700">Umumiy ball</span>
-                <span className="text-4xl font-bold text-green-600 mt-2 mb-2">{quizResult.totalScore}</span>
+                <span className="text-4xl font-bold text-green-600 mt-2 mb-2">{quizResult.totalScore.toFixed(2)}</span>
                 <span className="text-gray-500 text-sm">{new Date(quizResult.createdAt).toLocaleString()}</span>
               </div>
               <div className="mb-8">
@@ -497,7 +497,7 @@ export default function Quiz() {
                   </div>
                   <div className="flex justify-between mb-1">
                     <span>Ball:</span>
-                    <span className="font-bold">{quizResult.main.score}</span>
+                    <span className="font-bold">{quizResult.main.score.toFixed(2)}</span>
                   </div>
                 </div>
                 <div className="mb-4 p-4 rounded-lg border-r-4 border-purple-500 bg-purple-50 flex-1">
@@ -508,7 +508,7 @@ export default function Quiz() {
                   </div>
                   <div className="flex justify-between mb-1">
                     <span>Ball:</span>
-                    <span className="font-bold">{quizResult.addition.score}</span>
+                    <span className="font-bold">{quizResult.addition.score.toFixed()}</span>
                   </div>
                 </div>
                 </div>
@@ -522,7 +522,7 @@ export default function Quiz() {
                       </div>
                       <div className="flex justify-between mb-1">
                         <span>Ball:</span>
-                        <span className="font-bold">{m.score}</span>
+                        <span className="font-bold">{m.score.toFixed()}</span>
                       </div>
                     </div>
                   ))}
