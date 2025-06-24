@@ -53,14 +53,19 @@ export interface QuizFetchResponse {
   mandatory: QuizSubjectWithTests[];
 }
 
+export interface AnswerItem {
+  questionId: string;
+  answerId: string;
+}
+
 export interface QuizResultSubject {
   subject: string; // subject ObjectId
-  answers: string[]; // array of option IDs
+  answers: AnswerItem[]; // array of { questionId, answerId }
 }
 
 export interface QuizResultMandatory {
   subject: string;
-  answers: string[];
+  answers: AnswerItem[];
 }
 
 export interface QuizResultPayload {

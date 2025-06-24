@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { quizService } from "../../services/quiz.service";
-import type { QuizFetchResponse, QuizTest } from "../../services/quiz.service";
+import type { QuizFetchResponse, QuizTest, AnswerItem, QuizResultPayload } from "../../services/quiz.service";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../components/ui/dialog";
@@ -31,9 +31,9 @@ export default function Quiz() {
   const [quiz, setQuiz] = useState<QuizFetchResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [current, setCurrent] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>(() => {
+  const [answers, setAnswers] = useState<AnswerItem[]>(() => {
     const saved = localStorage.getItem("quiz-answers");
-    return saved ? JSON.parse(saved) : {};
+    return saved ? JSON.parse(saved) : [];
   });
   const [remaining, setRemaining] = useState(getInitialTime());
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -53,7 +53,7 @@ export default function Quiz() {
     setRemaining(defaultTime);
     // Reset answers for new test
     localStorage.removeItem("quiz-answers");
-    setAnswers({});
+    setAnswers([]);
     setLoading(true);
     quizService
       .fetchQuiz(blockId)
@@ -113,7 +113,8 @@ export default function Quiz() {
   useEffect(() => {
     if (loading) return;
     autoSaveRef.current = setInterval(() => {
-      quizService.autoSaveQuiz({ blockId: blockId || "", answers, remaining });
+      const answersObj = Object.fromEntries(answers.map(a => [a.questionId, a.answerId]));
+      quizService.autoSaveQuiz({ blockId: blockId || "", answers: answersObj, remaining });
     }, 60000);
     return () => clearInterval(autoSaveRef.current!);
   }, [answers, remaining, loading, blockId]);
@@ -127,7 +128,8 @@ export default function Quiz() {
   useEffect(() => {
     const beforeUnload = (e: BeforeUnloadEvent) => {
       setWarning(true);
-      quizService.autoSaveQuiz({ blockId: blockId || "", answers, remaining });
+      const answersObj = Object.fromEntries(answers.map(a => [a.questionId, a.answerId]));
+      quizService.autoSaveQuiz({ blockId: blockId || "", answers: answersObj, remaining });
       e.preventDefault();
       e.returnValue = "";
     };
@@ -148,8 +150,13 @@ export default function Quiz() {
     };
 
     // Helper to get answers for a group of tests
-    const getAnswers = (tests: QuizTest[]) =>
-      tests.map((test) => answers[test._id]).filter(Boolean);
+    const getAnswers = (tests: QuizTest[]): AnswerItem[] =>
+      tests
+        .map((test) => {
+          const found = answers.find((a) => a.questionId === test._id);
+          return found ? { questionId: test._id, answerId: found.answerId } : undefined;
+        })
+        .filter((item): item is AnswerItem => !!item);
 
     // Main
     const mainSubjectId = getSubjectId(
@@ -176,11 +183,10 @@ export default function Quiz() {
     // Mandatory
     const mandatory = (quiz.mandatory || []).map((m) => {
       const subjectId = m.subject?._id || "";
-      const mAnswers = getAnswers(m.tests);
-      return { subject: subjectId, answers: mAnswers };
+      return { subject: subjectId, answers: getAnswers(m.tests) };
     });
 
-    const payload = {
+    const payload: QuizResultPayload = {
       block: blockId,
       main,
       addition,
@@ -195,8 +201,11 @@ export default function Quiz() {
   };
 
   // Handle answer selection
-  const handleAnswer = (questionId: string, optionId: string) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
+  const handleAnswer = (questionId: string, answerId: string) => {
+    setAnswers((prev) => {
+      const filtered = prev.filter((item) => item.questionId !== questionId);
+      return [...filtered, { questionId, answerId }];
+    });
   };
 
   // UI helpers
@@ -284,7 +293,7 @@ export default function Quiz() {
                       <button
                         key={q._id}
                         className={`w-8 h-8 text-xs font-medium rounded ${
-                          answers[q._id]
+                          answers.find((a) => a.questionId === q._id)?.answerId
                             ? "bg-green-200 text-green-700"
                             : "bg-gray-100 text-gray-600"
                         } ${i === current ? "ring-2 ring-blue-500" : ""}`}
@@ -309,7 +318,7 @@ export default function Quiz() {
                       <button
                         key={q._id}
                         className={`w-8 h-8 text-xs font-medium rounded ${
-                          answers[q._id]
+                          answers.find((a) => a.questionId === q._id)?.answerId
                             ? "bg-green-200 text-green-700"
                             : "bg-gray-100 text-gray-600"
                         } ${
@@ -342,7 +351,7 @@ export default function Quiz() {
                           <button
                             key={q._id}
                             className={`w-8 h-8 text-xs font-medium rounded ${
-                              answers[q._id]
+                              answers.find((a) => a.questionId === q._id)?.answerId
                                 ? "bg-green-200 text-green-700"
                                 : "bg-gray-100 text-gray-600"
                             } ${
@@ -371,7 +380,7 @@ export default function Quiz() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Javob berilgan:</span>
                   <span className="font-medium text-green-600">
-                    {Object.keys(answers).length}/{allQuestions.length}
+                    {answers.length}/{allQuestions.length}
                   </span>
                 </div>
               </div>
@@ -405,7 +414,7 @@ export default function Quiz() {
                     <button
                       key={opt._id}
                       className={`w-full text-left p-4 rounded-lg border-2 ${
-                        answers[currentQuestion._id] === opt._id
+                        answers.find((a) => a.questionId === currentQuestion._id && a.answerId === opt._id)
                           ? "border-blue-500 bg-blue-50"
                           : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                       }`}
